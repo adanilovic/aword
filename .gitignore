@@ -4,6 +4,12 @@
 *.o
 *.obj
 
+# Build Target
+target
+
+# GNU Make Dependency Files
+dep/*.d
+
 # Precompiled Headers
 *.gch
 *.pch

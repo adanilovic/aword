@@ -13,7 +13,7 @@ DEPS:=$(patsubst $(SRCDIR)/%.cpp,$(DEPDIR)/%.d,$(CPPSRC))
 
 #include --static and the -static in the library to link statically
 #remove these to link with the shared libraries dyamically
-LIBS=`pkg-config --cflags --libs --static allegro-static-5.0 allegro_ttf-static-5.0 allegro_font-static-5.0 allegro_primitives-static-5.0 allegro_image-static-5.0`
+LIBS=`pkg-config --cflags --libs gtk+-3.0`
 
 #rule for a target
 CURRENT_TARGET=$(patsubst $(ODIR)/%.o, $(SRCDIR)/%.cpp, $@)
@@ -27,12 +27,12 @@ include $(DEPS)
 #each object file is dependent on all src and header files
 #even if not included, just to make things simpler for now
 $(OBJS): 
-	$(CC) -Wall -I$(INCDIR) -c $(CURRENT_TARGET) -o $@
+	$(CC) -Wall -I$(INCDIR) $(LIBS) -c $(CURRENT_TARGET) -o $@
 
 #link all object files to create executable
 $(TARGET): $(OBJS)
 	@echo
-	$(CC) $(OBJS) $(LIBS) -o $@
+	$(CC) $(OBJS) -o $@
 
 #in bash, $$ means expand to shell process ID.
 #This guarantees uniqueness of a file name
