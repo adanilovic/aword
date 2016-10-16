@@ -13,7 +13,8 @@ DEPS:=$(patsubst $(SRCDIR)/%.cpp,$(DEPDIR)/%.d,$(CPPSRC))
 
 #include --static and the -static in the library to link statically
 #remove these to link with the shared libraries dyamically
-LIBS=`pkg-config --cflags --libs gtk+-3.0`
+LIBS=`pkg-config --libs gtk+-3.0`
+CFLAGS=`pkg-config --cflags gtk+-3.0`
 
 #rule for a target
 CURRENT_TARGET=$(patsubst $(ODIR)/%.o, $(SRCDIR)/%.cpp, $@)
@@ -27,12 +28,12 @@ include $(DEPS)
 #each object file is dependent on all src and header files
 #even if not included, just to make things simpler for now
 $(OBJS): 
-	$(CC) -Wall -I$(INCDIR) $(LIBS) -c $(CURRENT_TARGET) -o $@
+	$(CC) -Wall -I$(INCDIR) -c $(CURRENT_TARGET) -o $@ $(CFLAGS) $(LIBS)
 
 #link all object files to create executable
 $(TARGET): $(OBJS)
 	@echo
-	$(CC) $(OBJS) -o $@
+	$(CC) $(OBJS) -o $@ $(LIBS) $(CFLAGS)
 
 #in bash, $$ means expand to shell process ID.
 #This guarantees uniqueness of a file name
