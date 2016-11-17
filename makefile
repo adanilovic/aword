@@ -13,8 +13,8 @@ DEPS:=$(patsubst $(SRCDIR)/%.cpp,$(DEPDIR)/%.d,$(CPPSRC))
 
 #include --static and the -static in the library to link statically
 #remove these to link with the shared libraries dyamically
-LIBS=`pkg-config --libs gtk+-3.0`
-CFLAGS=`pkg-config --cflags gtk+-3.0`
+LIBS=
+CFLAGS=
 
 #rule for a target
 CURRENT_TARGET=$(patsubst $(ODIR)/%.o, $(SRCDIR)/%.cpp, $@)

@@ -1,2 +1,2 @@
-# aedit
-Text editor using GTK and C++
+# aword
+Find the highest scoring word
