@@ -13,7 +13,7 @@ DEPS:=$(patsubst $(SRCDIR)/%.cpp,$(DEPDIR)/%.d,$(CPPSRC))
 
 #include --static and the -static in the library to link statically
 #remove these to link with the shared libraries dyamically
-LIBS=
+LIBS=-std=c++11
 CFLAGS=
 
 #rule for a target
