@@ -20,6 +20,42 @@ constexpr char multiplier_chars[4] =
     'L'
 };
 
+struct letter_score
+{
+    char l;
+    uint32_t score;
+};
+
+struct letter_score values[]
+{
+    {'a', 1,}
+    {'b', 4,}
+    {'c', 4,}
+    {'d', 2,}
+    {'e', 1,}
+    {'f', 4,}
+    {'g', 3,}
+    {'h', 3,}
+    {'i', 1,}
+    {'j', 10,}
+    {'k', 5,}
+    {'l', 2,}
+    {'m', 4,}
+    {'n', 2,}
+    {'o', 1,}
+    {'p', 4,}
+    {'q', 10,}
+    {'r', 1,}
+    {'s', 1,}
+    {'t', 1,}
+    {'u', 2,}
+    {'v', 5,}
+    {'w', 4,}
+    {'x', 8,}
+    {'y', 3,}
+    {'z', 10,}
+};
+
 enum Multiplier
 {
     NONE,
@@ -66,6 +102,7 @@ public:
     void set_letter( char arg ) { letter = arg; }
     char get_letter() { return letter; }
     bool has_latter() { return ( get_letter() != TILE_EMPTY ); }
+    uint32_t get_score() { return score; }
 
     void set_multiplier( enum Multiplier arg ) { mul = arg; }
     enum Multiplier get_multiplier() { return mul; }
@@ -73,10 +110,12 @@ public:
 private:
     char letter;
     enum Multiplier mul;
+    uint32_t score;
 };
 
 Tile::Tile( void ) : letter( TILE_EMPTY ),
-                     mul(NONE)
+                     mul(NONE),
+                     score(0)
 {
 
 }
@@ -94,11 +133,15 @@ public:
     void Add_Row();
     void Add_Tile_To_Current_Row( );
     void Add_Multiplier_To_Current_Tile( enum Multiplier mu );
+    void Add_Letter( uint32_t r, uint32_t c, char l );
     void Display();
+    uint32_t ComputeScore();
 
 private:
     std::vector< std::vector< Tile > > board;
 };
+
+Board myBoard;
 
 Board::Board()
 {
@@ -160,7 +203,7 @@ int32_t Parse_Board( std::string board_file_name, Board &myBoard )
                 &&  ( ret == 0 )
               )
         {
-            myBoard.Display();
+            //myBoard.Display();
 
             char line[256];
             memset( line, 0, sizeof( line ) );
@@ -184,7 +227,7 @@ int32_t Parse_Board( std::string board_file_name, Board &myBoard )
                 char multiplier[2];
                 memset( multiplier, 0, sizeof( multiplier ) );
 
-                std::cout << "AD - Parse_Board, line = " << line << std::endl;
+                //std::cout << "AD - Parse_Board, line = " << line << std::endl;
 
                 for( uint32_t i = 0; 
                                         ( i < ELEM_COUNT( line ) )
@@ -193,18 +236,18 @@ int32_t Parse_Board( std::string board_file_name, Board &myBoard )
                      ++i )
                 {                
                     //std::cout << "AD - Parse_Board, line[" << i << "] = " << line[i] << std::endl;
-                    printf("AD - Parse_Board, line[%02x] = %c %08x\n", i, line[i], line[i]);
+                    //printf("AD - Parse_Board, line[%02x] = %c %08x\n", i, line[i], line[i]);
 
                     switch ( line[i] )
                     {
                         case TILE_TOP_BOTTOM:
-                            std::cout << "AD - Parse_Board, TILE_TOP_BOTTOM" << std::endl;
+                            //std::cout << "AD - Parse_Board, TILE_TOP_BOTTOM" << std::endl;
                             skip_line = true;
                             row_start = false;
                             break;
 
                         case TILE_DELIMITER:
-                            std::cout << "AD - Parse_Board, TILE_DELIMITER" << std::endl;
+                            //std::cout << "AD - Parse_Board, TILE_DELIMITER" << std::endl;
 
                             if( !row_start )
                             {
@@ -217,7 +260,7 @@ int32_t Parse_Board( std::string board_file_name, Board &myBoard )
                             break;
 
                         case TILE_EMPTY:
-                            std::cout << "AD - Parse_Board, TILE_EMPTY" << std::endl;
+                            //std::cout << "AD - Parse_Board, TILE_EMPTY" << std::endl;
                             if( !tile_start )
                             {
                                 myBoard.Add_Tile_To_Current_Row();
@@ -230,7 +273,7 @@ int32_t Parse_Board( std::string board_file_name, Board &myBoard )
                         case multiplier_chars[1]:
                         case multiplier_chars[2]:
                         case multiplier_chars[3]:
-                            std::cout << "AD - Parse_Board, multiplier_chars" << std::endl;
+                            //std::cout << "AD - Parse_Board, multiplier_chars" << std::endl;
                         
                             if( !tile_start )
                             {
@@ -255,7 +298,7 @@ int32_t Parse_Board( std::string board_file_name, Board &myBoard )
                         case '\n':
                         case '\r':
                         case '\0':
-                            std::cout << "AD - Parse_Board, end of line" << std::endl;
+                            //std::cout << "AD - Parse_Board, end of line" << std::endl;
                             skip_line = true;
                             break;
 
@@ -272,27 +315,107 @@ int32_t Parse_Board( std::string board_file_name, Board &myBoard )
     }
     else
     {
+        std::cout << "ERROR: Could not open file" << std::endl;
         ret = -1;
     }
 
     return ret;
 }
 
+void Board::Add_Letter( uint32_t r, uint32_t c, char l )
+{
+    board[r][c].set_letter( l );
+}
+
+uint32_t Board::ComputeScore()
+{
+    uint32_t score = 0;
+
+    for( uint32_t i = 0; i < board.size(); ++i )
+    {
+        for( uint32_t j = 0; j < board[i].size(); ++j )
+        {
+            board[i][j].Display();
+        }
+    }
+
+    return score;
+}
+
+void Print_Supported_Commands()
+{
+    std::cout << "Supported Commands are:"       << std::endl;
+    std::cout << "\t load <Path To Board File> " << std::endl;
+    std::cout << "\t display"                    << std::endl;
+    std::cout << "\t addl <r><c><letter>"        << std::endl;
+    std::cout << "\t exit"                       << std::endl;
+}
+
+void Add_Letter( uint32_t r, uint32_t c, char l )
+{
+    myBoard.Add_Letter(r, c, l);
+}
+
+void Execute_Command( std::string CommandLine )
+{
+    std::cout << "CommandLine = " << CommandLine << std::endl;
+
+    if( strncmp(CommandLine.c_str(), "load", 4 ) == 0 )
+    {
+        char buf[100];
+        char *filePath;
+        memset(buf, 0, sizeof (buf ) );
+        snprintf( buf, sizeof( buf ), "%s", CommandLine.c_str() );
+        filePath = strtok( buf, " " );
+        filePath = strtok( NULL, " " );
+        printf("filePath = %s\n", filePath);
+
+        Parse_Board( filePath, myBoard );
+    }
+    else if( CommandLine == "display" )
+    {
+        myBoard.Display();
+    }
+    else if( strncmp(CommandLine.c_str(), "addl", 4 ) == 0 )
+    {
+        uint32_t r = 0;
+        uint32_t c = 0;
+        char l = 0;
+        
+        sscanf( CommandLine.c_str(), "addl %d %d %c", &r, &c, &l );
+
+        myBoard.Add_Letter( r, c, l );
+    }
+    else if( CommandLine == "exit" )
+    {
+        //do nothing, handled by caller
+    }
+    else
+    {
+        std::cout << "ERROR: Unrecognized Command" << std::endl;
+    }
+}
+
 int main(int argc, char **argv)
 {
-    if( argc != 2 )
+    if( argc != 1 )
     {
-        std::cout << "ERROR: Usage is: " << argv[0] << " <path_to_board_file>" << std::endl;
+        std::cout << "ERROR: Usage is: " << argv[0] << std::endl;
         return -1;
     }
 
-    std::cout << "<path_to_board_file> = " << argv[1] << std::endl;
+    std::cout << "aword" << std::endl;
 
-    Board myBoard;
+    Print_Supported_Commands();
    
-    Parse_Board( argv[1], myBoard );
+    std::string CommandLine;
 
-    myBoard.Display();
+    while( CommandLine != "exit" )
+    {
+        getline( std::cin, CommandLine );
+
+        Execute_Command( CommandLine );
+    }
 
 	return 0;
 }

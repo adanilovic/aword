@@ -56,7 +56,7 @@ print_vars:
 
 gen_tags:
 	ctags -R --c++-kinds=+p --fields=+iaS --extra=+qf .
-	cscope -R -b
+	cscope -b -q -k -R
 
 .PHONY: clean
 clean: 
