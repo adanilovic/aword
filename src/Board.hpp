@@ -10,6 +10,8 @@
 class Tile;
 class Board;
 extern Board myBoard;
+extern int32_t LoadEnglishWordList();
+extern void CloseEnglishWordList();
 
 enum Multiplier
 {
@@ -60,10 +62,13 @@ public:
     int32_t Parse_Board( std::string board_file_name );
     void Display();
     uint32_t ComputeScore();
+    bool isCurrentWordAWord( );
+    void deleteCurrentWord() { current_word.clear(); }
     int32_t Serialize( std::string file_path );
 
 private:
     std::vector< std::vector< Tile > > board;
+    std::string current_word;
 };
 
 #endif // #ifndef BOARD_HPP

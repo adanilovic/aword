@@ -15,6 +15,7 @@ void Print_Supported_Commands()
     std::cout << "\t save <Path To Board File> " << std::endl;
     std::cout << "\t display"                    << std::endl;
     std::cout << "\t addl <r><c><letter>"        << std::endl;
+    std::cout << "\t end_turn"                   << std::endl;
     std::cout << "\t exit"                       << std::endl;
 }
 
@@ -65,6 +66,19 @@ void Execute_Command( std::string CommandLine )
 
         myBoard.Add_Letter( r, c, l );
     }
+    else if( strncmp(CommandLine.c_str(), "end_turn", 8 ) == 0 )
+    {
+        if( !myBoard.isCurrentWordAWord( ) )
+        {
+            std::cout << "ERROR: Current word is unacceptable!" << std::endl;
+            myBoard.deleteCurrentWord();
+        }
+        else
+        {
+            std::cout << "Word is Accepted!" << std::endl;
+            //compute score
+        }
+    }
     else if( CommandLine == "exit" )
     {
         //do nothing, handled by caller
@@ -77,6 +91,8 @@ void Execute_Command( std::string CommandLine )
 
 int main(int argc, char **argv)
 {
+    int32_t ret = 0;
+
     if( argc != 1 )
     {
         std::cout << "ERROR: Usage is: " << argv[0] << std::endl;
@@ -89,12 +105,17 @@ int main(int argc, char **argv)
    
     std::string CommandLine;
 
+    ret = LoadEnglishWordList();
+    if( ret ) { return ret; }
+    
     while( CommandLine != "exit" )
     {
         getline( std::cin, CommandLine );
 
         Execute_Command( CommandLine );
     }
+
+    CloseEnglishWordList();
 
 	return 0;
 }

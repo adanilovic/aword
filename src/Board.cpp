@@ -10,6 +10,9 @@
 
 Board myBoard;
 
+static std::string path_to_english_word_list = "/usr/share/dict/american-english";
+static std::ifstream english_word_list_file;
+
 constexpr char multiplier_chars[4] = 
 {
     'D',
@@ -47,6 +50,33 @@ struct letter_score values[] =
     {'y', 3,},
     {'z', 10,}
 };
+
+int32_t LoadEnglishWordList( void )
+{
+    int32_t ret = 0;
+
+    english_word_list_file.open( path_to_english_word_list.c_str(), std::ifstream::in );
+
+    if( english_word_list_file.is_open() )
+    {
+        //success
+    }
+    else
+    {
+        ret = -1;
+        std::cout << "ERROR: LoadEnglishWordList, error loading english word list file" << std::endl;
+    }
+
+    return ret;
+}
+
+void CloseEnglishWordList( void )
+{
+    if( english_word_list_file.is_open() )
+    {
+        english_word_list_file.close();
+    }
+}
 
 enum Multiplier getMultiplierFromString( char * ms )
 {
@@ -139,6 +169,8 @@ void Board::Display()
     {
         std::cout << "Board::Display(), size of board is " << board.size() << " x " << board.back().size() << std::endl;
 
+        std::cout << "Board::Display(), current_word = " << current_word << std::endl;
+
         //std::cout << "----------------------------------------------" << std::endl;
 
         for( uint32_t i = 0; i < board.size(); ++i )
@@ -183,6 +215,33 @@ void Board::Add_Letter_To_Current_Tile( char l )
 void Board::Add_Letter( uint32_t r, uint32_t c, char l )
 {
     board[r][c].set_letter( l );
+    current_word.push_back( l );
+}
+
+bool Board::isCurrentWordAWord( void )
+{
+    bool ret = false;
+
+    while (     ( english_word_list_file.good() )
+            &&  ( ret == false )
+          )
+    {
+        char line[256];
+        memset( line, 0, sizeof( line ) );
+        english_word_list_file.getline( line, sizeof( line ) );
+
+        if( !english_word_list_file.eof() )
+        {
+            std::string tmp = line;
+
+            if( current_word.compare( line ) == 0 )
+            {
+                ret = true;
+            } 
+        }
+    }
+
+    return ret;
 }
 
 uint32_t Board::ComputeScore()
@@ -382,7 +441,7 @@ int32_t Board::Serialize( std::string file_path )
     int32_t ret = 0;
 
     std::ofstream board_file;
-    board_file.open( file_path.c_str(), std::ifstream::out );
+    board_file.open( file_path.c_str(), std::ofstream::out );
 
     if( board_file.is_open() )
     {
@@ -396,7 +455,6 @@ int32_t Board::Serialize( std::string file_path )
             {
                 board[i][j].Serialize( board_file );
                 board_file << "|";
-
             }
         
             board_file << std::endl;
