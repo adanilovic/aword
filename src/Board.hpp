@@ -34,6 +34,7 @@ class Tile
 {
 public:
     Tile();
+    Tile( const Tile &t );
     void Display();
     void set_letter( char arg ) { letter = arg; }
     char get_letter() { return letter; }
@@ -59,8 +60,12 @@ public:
     void Add_Multiplier_To_Current_Tile( enum Multiplier mu );
     void Add_Letter_To_Current_Tile( char l );
     void Add_Letter( uint32_t r, uint32_t c, char l );
+    void Add_Word( uint32_t r, uint32_t c, uint32_t d, std::string word );
+    void Set_TileBag( std::string bag );
     int32_t Parse_Board( std::string board_file_name );
-    void Display();
+    void Display( );
+    uint32_t getNumCol();
+    uint32_t countPossibleWordsFromBag();
     uint32_t ComputeScore();
     bool isCurrentWordAWord( );
     void deleteCurrentWord() { current_word.clear(); }
@@ -69,6 +74,7 @@ public:
 private:
     std::vector< std::vector< Tile > > board;
     std::string current_word;
+    std::string current_tileBag;
 };
 
 #endif // #ifndef BOARD_HPP

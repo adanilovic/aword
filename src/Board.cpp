@@ -5,10 +5,10 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 #include "Board.hpp"
-
-Board myBoard;
+#include "myMath.hpp"
 
 static std::string path_to_english_word_list = "/usr/share/dict/american-english";
 static std::ifstream english_word_list_file;
@@ -147,6 +147,13 @@ Tile::Tile( void ) : letter( TILE_EMPTY ),
 
 }
 
+Tile::Tile( const Tile &t )
+{
+    letter = t.letter;
+    mul = t.mul;
+    score = t.score;
+}
+
 void Tile::Display()
 {
     std::cout << letter << " " << (uint32_t)mul;
@@ -163,15 +170,17 @@ Board::Board()
 
 }
 
-void Board::Display()
+void Board::Display( )
 {
     if( board.size() )
     {
-        std::cout << "Board::Display(), size of board is " << board.size() << " x " << board.back().size() << std::endl;
-
-        std::cout << "Board::Display(), current_word = " << current_word << std::endl;
+        std::cout << "Board::Display(), size of board is "  << board.size() << " x " << board.back().size() << std::endl;
+        std::cout << "Board::Display(), current_word = "    << current_word << std::endl;
+        std::cout << "Board::Display(), current_tileBag = " << current_tileBag << std::endl;
 
         //std::cout << "----------------------------------------------" << std::endl;
+
+        //std::cout << std::setw( offset );
 
         for( uint32_t i = 0; i < board.size(); ++i )
         {
@@ -184,11 +193,23 @@ void Board::Display()
             //std::cout << std::endl << "----------------------------------------------" << std::endl;
             std::cout << std::endl;
         }
-
     }
     else
     {
         std::cout << "Board::Display(), size of board is " << board.size() << std::endl;
+    }
+}
+
+uint32_t Board::getNumCol()
+{
+    if( board.size() == 0 )
+    {
+        return 0;
+    }
+    else
+    {
+        //assume all rows are the same length
+        return board.back().size();
     }
 }
 
@@ -214,13 +235,87 @@ void Board::Add_Letter_To_Current_Tile( char l )
 
 void Board::Add_Letter( uint32_t r, uint32_t c, char l )
 {
+    //TODO: Add boundary checks
     board[r][c].set_letter( l );
     current_word.push_back( l );
+}
+
+void Board::Add_Word( uint32_t r, uint32_t c, uint32_t d, std::string word )
+{
+    if(    ( r > board.size() )
+        || ( c > board.back().size() )
+      )
+    {
+        std::cout << "ERROR: Add_Word, r " << r << " or c " << c << " outside of board dimensions" << std::endl;
+        return;
+    }
+
+    if( d == 0  )   // (0=down, 1=right)
+    {
+        if( ( r + word.length() ) > board.size() )
+        {
+            std::cout << "ERROR: Add_Word, r " << r << " + word.length() " << word.length() << " outside of board dimensions" << std::endl;
+            return;        
+        }
+    }
+    else if( d == 1 )
+    {
+        if( ( c + word.length() ) > board.size() )
+        {
+            std::cout << "ERROR: Add_Word, c " << c << " + word.length() " << word.length() << " outside of board dimensions" << std::endl;
+            return;        
+        }
+    }
+    else
+    {
+        std::cout << "ERROR: Add_Word, illegal value for d, d = " << d << std::endl;
+    }
+
+    uint32_t offset = 0;
+
+    //reject if the current_word will overlap with any existing letters
+    for ( std::string::iterator it = word.begin(); it != word.end(); ++it)
+    {
+        uint32_t tmp_r = r + ( d ? 0 : offset );
+        uint32_t tmp_c = c + ( d ? offset : 0 );
+
+        if( board[ tmp_r ][ tmp_c ].get_letter() != TILE_EMPTY )
+        {
+            std::cout << "ERROR: Add_Word, current_word overlaps with (r, c) = (" << tmp_r << ", " << tmp_c << ")" << std::endl;
+            return;
+        }
+
+        ++offset;
+    }
+
+    //TODO: reject if the current_word will form invalid English words with touching characters
+
+    current_word = word;
+
+    offset = 0;
+
+    std::cout << "AD - current_word = " << current_word << std::endl;
+
+    for ( std::string::iterator it = current_word.begin(); it != current_word.end(); ++it)
+    {
+        board[ r + ( d ? 0 : offset ) ][ c + ( d ? offset : 0 ) ].set_letter( *it );
+
+        //Add_Letter( r + ( d ?      0 : offset ), 
+        //            c + ( d ? offset :      0 ), 
+        //            *it );
+
+        ++offset;
+    }
 }
 
 bool Board::isCurrentWordAWord( void )
 {
     bool ret = false;
+
+    if( current_word.length() == 0 )
+    {
+        return ret;
+    }
 
     while (     ( english_word_list_file.good() )
             &&  ( ret == false )
@@ -244,6 +339,55 @@ bool Board::isCurrentWordAWord( void )
     return ret;
 }
 
+uint32_t Board::countPossibleWordsFromBag()
+{
+    //n items total, and number of ways k items can be ordered
+    //P(n, k) = n! / (n - k)!
+
+    uint32_t count = 0;
+
+    if( current_tileBag.length() == 0 )
+    {
+        return count;
+    }
+
+    const uint32_t n = current_tileBag.length();
+    const uint32_t n_fact = factorial( n );
+
+    uint32_t numPermutations = 0;
+
+    for( uint32_t k = 1; k <= n; ++k )
+    {
+        uint32_t n_minus_k_fact = factorial( n - k );
+
+        numPermutations += n_fact / n_minus_k_fact;
+    }
+
+    for( uint32_t i = 0; i < numPermutations; ++i )
+    {
+        //is();
+    }
+
+    /*while ( english_word_list_file.good() )
+    {
+        char line[256];
+        memset( line, 0, sizeof( line ) );
+        english_word_list_file.getline( line, sizeof( line ) );
+
+        if( !english_word_list_file.eof() )
+        {
+            std::string tmp = line;
+
+            if( current_word.compare( line ) == 0 )
+            {
+                ret = true;
+            } 
+        }
+    }*/
+
+    return numPermutations;
+}
+
 uint32_t Board::ComputeScore()
 {
     uint32_t score = 0;
@@ -257,6 +401,11 @@ uint32_t Board::ComputeScore()
     }
 
     return score;
+}
+
+void Board::Set_TileBag( std::string bag )
+{
+    current_tileBag = bag;
 }
 
 int32_t Board::Parse_Board( std::string board_file_name )
