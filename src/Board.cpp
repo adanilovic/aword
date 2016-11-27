@@ -308,11 +308,11 @@ void Board::Add_Word( uint32_t r, uint32_t c, uint32_t d, std::string word )
     }
 }
 
-bool Board::isCurrentWordAWord( void )
+static bool _isCurrentWordAWord( std::string word )
 {
     bool ret = false;
 
-    if( current_word.length() == 0 )
+    if( word.length() == 0 )
     {
         return ret;
     }
@@ -329,7 +329,7 @@ bool Board::isCurrentWordAWord( void )
         {
             std::string tmp = line;
 
-            if( current_word.compare( line ) == 0 )
+            if( word.compare( line ) == 0 )
             {
                 ret = true;
             } 
@@ -337,6 +337,11 @@ bool Board::isCurrentWordAWord( void )
     }
 
     return ret;
+}
+
+bool Board::isCurrentWordAWord( void )
+{
+    return _isCurrentWordAWord( current_word );
 }
 
 uint32_t Board::countPossibleWordsFromBag()
@@ -363,10 +368,29 @@ uint32_t Board::countPossibleWordsFromBag()
         numPermutations += n_fact / n_minus_k_fact;
     }
 
-    for( uint32_t i = 0; i < numPermutations; ++i )
+    //ex: abcd
+    //a, ab, ac, ad
+    //abc, abd
+    //acb, acd
+    //abd, adc
+    //
+    //abcd, acdb, adbc, 
+    //
+
+    uint32_t myNumPerm = 0;
+
+    for( uint32_t i = 0; i < n; ++i )
     {
-        //is();
+        for(  )
+        {
+
+        }
     }
+
+    //for( uint32_t i = 0; i < numPermutations; ++i )
+    //{
+    //    _isCurrentWordAWord();
+    //}
 
     /*while ( english_word_list_file.good() )
     {

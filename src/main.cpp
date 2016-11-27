@@ -23,6 +23,7 @@ void Print_Supported_Commands()
     std::cout << "\t bag <letters>"                                 << std::endl;
     std::cout << "\t count_bag"                                     << std::endl;
     std::cout << "\t end_turn"                                      << std::endl;
+    std::cout << "\t testp"                                         << std::endl;
     std::cout << "\t exit"                                          << std::endl;
 }
 
@@ -114,6 +115,152 @@ void Execute_Command( std::string CommandLine )
             myFutureBoard.deleteCurrentWord();
             myCurrentBoard = myFutureBoard;
         }
+    }
+    else if( strncmp(CommandLine.c_str(), "testp", 5 ) == 0 )
+    {
+        std::string myS = "abcd";
+
+        uint32_t n = myS.length();
+
+        //ex: abcd
+        //a, b, c, d
+        //
+        //ab, ac, ad
+        //ba, bc, bd
+        //ca, cb, cd
+        //da, db, dc
+        //
+        //abc, abd
+        //acb, acd
+        //abd, adc
+        //
+        //abcd, abdc 
+        //acbd, acdb
+        //adbc, adcb
+
+        //abcd          bacd
+        //abdc          badc
+
+        //bcd           acd
+        //bdc           adc
+
+        //cd            cd
+        //dc            dc
+
+        //Heap's algorithm
+        abc
+        n = 3
+        i = 0
+        
+            n = 2
+            i = 0
+
+                n = 1
+                        abc
+            
+            swap( A[0], A[1] ) = bac
+
+            n = 2
+            i = 1
+        
+                n = 1    
+
+
+        //Steinhaus-Johnson-Trotter algorithm
+        abcd
+
+        Step 1
+            d           c           b           a
+
+        Step 2
+            cd          bc          ab          ad?
+            dc          cb          ba
+
+        Step 3
+
+            cdb         bca         acd?
+            cbd         bac
+            bcd         abc
+            
+            bdc         acb
+            dbc         cab
+            dcb         cba
+
+        Step 4
+
+            cdba
+            cdab
+            cadb
+            acdb
+
+            acbd
+            cabd
+            cbad
+            cbda
+           
+            bcda
+            bcad
+            bacd
+            abcd
+
+            ... etc
+        //
+        abcd
+        
+        Step 1
+            a                           b                   c               d
+
+        Step 2
+            ab      ac      ad          bc      bd          cd
+            ba      ca      da          cb      db          dc
+
+        Step 3
+            abc     acd                 bcd     bda
+            acb     adc                 bdc     bad
+            cab     dac                 dbc     abd
+            cba     dca                 dcb     adb
+            bca     cda                 cdb     dab
+            bac     cad                 cbd     dba
+        //-------------------------------------------------------------------------
+        abcd
+        
+        Step 1
+            a                           b                   c               d
+
+    left:   b, c, d                     A, c, d             A, B, d         A, B, C
+
+        Step 2
+            ab      ac      ad          bc      bd          cd
+            ba      ca      da          cb      db          dc
+
+    left:   c, d    B, d    B, C        A, d    A, C        A, B
+
+        Step 3
+            abc     acd                 bcd
+            acb     adc                 bdc
+            cab     dac                 dbc
+            cba     dca                 dcb
+            bca     cda                 cdb
+            bac     cad                 cbd
+
+            abd
+            adb
+            dab
+            dba
+            bda
+            bad
+
+        //
+        uint32_t myNumPerm = 0;
+
+        for( uint32_t i = 0; i < n; ++i )
+        {
+            for(  )
+            {
+
+            }
+        }
+
     }
     else if( CommandLine == "exit" )
     {
